@@ -9,6 +9,8 @@ use Carp;
 use Module::Load 'load';
 use Git::Hooks;
 
+(my $CFG = __PACKAGE__) =~ s/.*::/githooks./;
+
 sub _changed {
 	my $git = shift;
 
@@ -21,11 +23,14 @@ sub _changed {
 }
 
 sub _set_critic {
+   my ($git) = @_;
+   my $pc_rc_filename = $git->get_config($CFG => 'profile');
+
 	load 'Perl::Critic';
 	load 'Perl::Critic::Violation';
 	load 'Perl::Critic::Utils';
 
-	my $pc = Perl::Critic->new;
+	my $pc = Perl::Critic->new('-profile' => $pc_rc_filename//q{});
 	my $verbosity = $pc->config->verbose;
 
 	# set the format to be a comment
@@ -36,11 +41,12 @@ sub _set_critic {
 }
 
 sub _check_violations {
+   my $git = shift;
 	my $files = shift;
 
 	my @violations;
 	foreach my $file ( @$files ) {
-		state $critic = _set_critic;
+		state $critic = _set_critic($git);
 
 		@violations = $critic->critique( $file );
 	}
@@ -52,7 +58,7 @@ PREPARE_COMMIT_MSG {
 	my ( $git, $commit_msg_file ) = @_;
 
 	my $changed    = _changed( $git );
-	my $violations = _check_violations( $changed );
+	my $violations = _check_violations( $git, $changed );
 
 	if ( @$violations ) {
 		my $pcf = 'Path::Class::File'; load $pcf;
@@ -70,7 +76,7 @@ PRE_COMMIT {
 	my $git = shift;
 
 	my $changed    = _changed( $git );
-	my $violations = _check_violations( $changed );
+	my $violations = _check_violations( $git, $changed );
 
 	if ( @$violations ) {
 		print @$violations;
