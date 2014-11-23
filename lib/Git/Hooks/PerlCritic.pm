@@ -34,8 +34,8 @@ sub _set_critic {
 	my $verbosity = $pc->config->verbose;
 
 	# set the format to be a comment
-	my $fmt = Perl::Critic::Utils::verbosity_to_format( $verbosity );
-	Perl::Critic::Violation::set_format( "# $fmt" );
+	my $format = Perl::Critic::Utils::verbosity_to_format( $verbosity );
+	Perl::Critic::Violation::set_format( "# $format" );
 
 	return $pc;
 }
@@ -45,7 +45,7 @@ sub _check_violations {
 	my $files = shift;
 
 	my @violations;
-	foreach my $file ( @$files ) {
+	foreach my $file ( @{$files} ) {
 		state $critic = _set_critic($git);
 
 		@violations = $critic->critique( $file );
@@ -60,7 +60,7 @@ PREPARE_COMMIT_MSG {
 	my $changed    = _changed( $git );
 	my $violations = _check_violations( $git, $changed );
 
-	if ( @$violations ) {
+	if ( @{$violations} ) {
 		my $pcf = 'Path::Class::File'; load $pcf;
 		my $file     = $pcf->new( $commit_msg_file );
 		my $contents = $file->slurp;
@@ -78,11 +78,11 @@ PRE_COMMIT {
 	my $changed    = _changed( $git );
 	my $violations = _check_violations( $git, $changed );
 
-	if ( @$violations ) {
-		print @$violations;
+	if ( @{$violations} ) {
+		print @{$violations};
 		# . operator causes the array ref to give count, otherwise it would
 		# stringify
-		croak '# please fix ' . @$violations . ' perl critic errors before committing';
+		croak '# please fix ' . @{$violations} . ' perl critic errors before committing';
 	}
 };
 
