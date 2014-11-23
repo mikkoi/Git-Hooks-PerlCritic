@@ -15,3 +15,7 @@ nytprof*
 .DS_Store
 MYMETA.*
 *.o
+
+# .perl-version sets the Perl version in plenv.
+.perl-version
+
