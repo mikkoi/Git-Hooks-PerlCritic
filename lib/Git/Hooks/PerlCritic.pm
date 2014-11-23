@@ -9,7 +9,7 @@ use Carp;
 use Module::Load 'load';
 use Git::Hooks;
 
-(my $CFG = __PACKAGE__) =~ s/.*::/githooks./;
+(my $CFG = __PACKAGE__) =~ s/.*::/githooks./msx;
 
 sub _changed {
 	my $git = shift;
@@ -92,9 +92,9 @@ PRE_COMMIT {
 
 =head1 DESCRIPTION
 
-Allows you to utilize L<Perl::Critic> via
+Allows you to utilize L<Perl::Critic|Perl::Critic> via
 L<git hooks|http://www.kernel.org/pub/software/scm/git/docs/githooks.html>
-using the L<Git::Hooks> framework.
+using the L<Git::Hooks|Git::Hooks> framework.
 
 First setup L<git-hooks.pl|Git::Hooks/"USAGE">
 
@@ -102,26 +102,35 @@ Then you should choose to use only one of the available hooks.
 
 =hook pre-commit
 
-	ln -s git-hooks.pl pre-commit
-	git config --add githooks.pre-commit PerlCritic
+	ln -s git-hooks.pl .git/hooks/pre-commit
+	git config --add githooks.plugin PerlCritic
 
-This hook will prevent a commit that doesn't pass L<Perl::Critic> from being
+This hook will prevent a commit that doesn't pass L<Perl::Critic|Perl::Critic> from being
 committed.
 
 =hook prepare-commit-msg
 
-	ln -s git-hooks.pl prepare-commit-msg
-	git config --add githooks.preprare-commit-msg PerlCritic
+	ln -s git-hooks.pl .git/hooks/prepare-commit-msg
+	git config --add githooks.plugin PerlCritic
 
 This hook will simply append commented out critic warnings to the commit
 message, so you may review them before committing.
+
+=head1 CONFIGURATION AND ENVIRONMENT
+
+Option I<profile> to define a perlcriticrc file. E.g.:
+
+	git config --add githooks.perlcritic.profile subdir/.perlcriticrc
 
 =head1 SEE ALSO
 
 =over
 
-=item L<Git::Hooks>
+=item L<Git::Hooks|Git::Hooks>
 
-=item L<Perl::Critic>
+=item L<Perl::Critic|Perl::Critic>
+
+=item Alternative way to use Perl::Critic with Git::Hooks package: L<Git::Hooks::CheckFile|Git::Hooks::CheckFile/"CONFIGURATION">.
 
 =back
+
